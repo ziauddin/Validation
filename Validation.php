@@ -10,7 +10,6 @@
      * @license https://github.com/davidecesarano/Validation/blob/master/LICENSE MIT License
      * @link https://github.com/davidecesarano/Validation
      */
-     
     class Validation {
         
         /**
@@ -25,13 +24,13 @@
             'int'           => '[0-9]+',
             'float'         => '[0-9\.,]+',
             'tel'           => '[0-9+\s()-]+',
-            'text'          => '[\p{L}0-9\s-.,;:!"%&()?+\'°#\/@]+',
+            'text'          => '[a-zA-Z0-9.\s\d\w]+',
             'file'          => '[\p{L}\s0-9-_!%&()=\[\]#@,.;+]+\.[A-Za-z0-9]{2,4}',
             'folder'        => '[\p{L}\s0-9-_!%&()=\[\]#@,.;+]+',
             'address'       => '[\p{L}0-9\s.,()°-]+',
             'date_dmy'      => '[0-9]{1,2}\-[0-9]{1,2}\-[0-9]{4}',
             'date_ymd'      => '[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}',
-            'email'         => '[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+[.]+[a-z-A-Z]'
+            'email'         => '[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+[.]+[a-z-A-Z]+'
         );
         
         /**
@@ -90,14 +89,14 @@
             if($name == 'array'){
                 
                 if(!is_array($this->value)){
-                    $this->errors[] = 'Formato campo '.$this->name.' non valido.';
+                    $this->errors[] = 'Field format '.$this->name.' invalid.';
                 }
             
             }else{
             
                 $regex = '/^('.$this->patterns[$name].')$/u';
                 if($this->value != '' && !preg_match($regex, $this->value)){
-                    $this->errors[] = 'Formato campo '.$this->name.' non valido.';
+                    $this->errors[] = 'Field format '.$this->name.' invalid.';
                 }
                 
             }
@@ -115,7 +114,7 @@
             
             $regex = '/^('.$pattern.')$/u';
             if($this->value != '' && !preg_match($regex, $this->value)){
-                $this->errors[] = 'Formato campo '.$this->name.' non valido.';
+                $this->errors[] = 'Field format '.$this->name.' invalid.';
             }
             return $this;
             
@@ -129,7 +128,7 @@
         public function required(){
             
             if((isset($this->file) && $this->file['error'] == 4) || ($this->value == '' || $this->value == null)){
-                $this->errors[] = 'Campo '.$this->name.' obbligatorio.';
+                $this->errors[] = 'Field '.$this->name.' is required';
             }            
             return $this;
             
@@ -147,13 +146,12 @@
             if(is_string($this->value)){
                 
                 if(strlen($this->value) < $length){
-                    $this->errors[] = 'Valore campo '.$this->name.' inferiore al valore minimo';
+                    $this->errors[] = 'Field value '.$this->name.' less than the minimum value';
                 }
-           
             }else{
                 
                 if($this->value < $length){
-                    $this->errors[] = 'Valore campo '.$this->name.' inferiore al valore minimo';
+                    $this->errors[] = 'Field value '.$this->name.' less than the minimum value';
                 }
                 
             }
@@ -173,13 +171,12 @@
             if(is_string($this->value)){
                 
                 if(strlen($this->value) > $length){
-                    $this->errors[] = 'Valore campo '.$this->name.' superiore al valore massimo';
+                    $this->errors[] = 'Field value '.$this->name.' higher than the maximum value';
                 }
-           
             }else{
                 
                 if($this->value > $length){
-                    $this->errors[] = 'Valore campo '.$this->name.' superiore al valore massimo';
+                    $this->errors[] = 'Field value '.$this->name.' higher than the maximum value';
                 }
                 
             }
@@ -197,7 +194,7 @@
         public function equal($value){
         
             if($this->value != $value){
-                $this->errors[] = 'Valore campo '.$this->name.' non corrispondente.';
+                $this->errors[] = 'Field value '.$this->name.' not matching.';
             }
             return $this;
             
@@ -212,7 +209,7 @@
         public function maxSize($size){
             
             if($this->file['error'] != 4 && $this->file['size'] > $size){
-                $this->errors[] = 'Il file '.$this->name.' supera la dimensione massima di '.number_format($size / 1048576, 2).' MB.';
+                $this->errors[] = 'The file '.$this->name.' exceeds the maximum size of '.number_format($size / 1048576, 2).' MB.';
             }
             return $this;
             
@@ -227,7 +224,7 @@
         public function ext($extension){
 
             if($this->file['error'] != 4 && pathinfo($this->file['name'], PATHINFO_EXTENSION) != $extension && strtoupper(pathinfo($this->file['name'], PATHINFO_EXTENSION)) != $extension){
-                $this->errors[] = 'Il file '.$this->name.' non è un '.$extension.'.';
+                $this->errors[] = 'The file '.$this->name.' it\'s not a '.$extension.'.';
             }
             return $this;
             
@@ -286,7 +283,6 @@
         public function result(){
             
             if(!$this->isSuccess()){
-               
                 foreach($this->getErrors() as $error){
                     echo "$error\n";
                 }
