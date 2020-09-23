@@ -1,362 +1,385 @@
 <?php
-class validation
-{
-	public function set_rules($field, $label = '', $rules = '')
-	{
-		$error = array();
-		if(is_array($field))
-		{
-			foreach($field as $value)
-			{
-				//form get or post field
-				$form_field		 	= 		$value['field'];
-				//label
-				$form_label 		= 		$value['label'];
-				//all rules
-				$form_rules 		= 		$value['rules'];
-				$form_email			=		$value['email'];
-				$form_min_length	= 		$value['min_length'];
-				$form_max_length	=		$value['max_length'];
-				$form_matches		=		$value['matches'];
-				$form_alpha_numeric	=		$value['alpha_numeric'];
-				$form_numeric		=		$value['numeric'];
-				$form_integer		=		$value['integer'];
-				$form_decimal		=		$value['decimal'];
-				$unique				=		$value['unique'];
-
-				if($form_rules == 'need')
-				{
-					if($this->required($form_field) == false)
-					{
-						$error[] = "The {$form_label} field is required";
-					}
-				}
-
-				if($form_email == 'valid')
-				{
-					if($this->valid_emails($form_field) == false)
-					{
-						$error[] = "The {$form_label} field must contain a valid email address";
-					}
-				}
-
-				if($unique == true)
-				{
-					$rules_exploed = explode('.',$unique);
-					if($this->unique($rules_exploed[0], $rules_exploed[1], $form_field) > 0)
-					{
-						$error[] = "The {$form_label} field must be unique.";
-					}
-				}
-
-				if($form_min_length == true)
-				{
-					if($this->min_length($form_field, $form_min_length) == false)
-					{
-						$error[] = "The {$form_label} minimum length {$form_min_length} character.";
-					}
-				}
-
-				if($form_max_length == true)
-				{
-					if($this->max_length($form_field, $form_max_length) == false)
-					{
-						$error[] = "The {$form_label} maximum length {$form_max_length} character.";
-					}
-				}
-
-				if($form_matches == true)
-				{
-					if($this->matches($form_matches, $form_field) == false)
-					{
-						$error[] = "The {$form_label} field does not match the Password field.";
-					}
-				}
-
-				if($form_alpha_numeric == true)
-				{
-					if($this->alpha_numeric($form_field) == false)
-					{
-						$error[] = "The {$form_label} field must be alpha numeric.";
-					}
-				}
-
-				if($form_numeric == true)
-				{
-					if($this->numeric($form_field) == false)
-					{
-						$error[] = "The {$form_label} field must be numeric.";
-					}
-				}
-
-				if($form_integer == true)
-				{
-					if($this->integer($form_field) == false)
-					{
-						$error[] = "The {$form_label} field must be integer.";
-					}
-				}
-
-				if($form_decimal == true)
-				{
-					if($this->decimal($form_field) == false)
-					{
-						$error[] = "The {$form_label} field must be decimal.";
-					}
-				}
-			}
-		}
-		else
-		{
-			$rules_exploed = explode('|',$rules);
-			for($x = 0; $x < count($rules_exploed); $x++)
-			{
-				$final_rules = $rules_exploed[$x];
-				$rules_exploed2 = explode('[', $final_rules);
-
-
-				if($final_rules == 'need')
-				{
-					if($this->required($field) == false)
-					{
-						$error[] = "The {$label} field is required.";
-					}
-				}
-
-				if($final_rules == 'valid')
-				{
-					if($this->valid_emails($field) == false)
-					{
-						$error[] = "The {$label} field must contain a valid email address.";
-					}
-				}
-
-				if($final_rules == 'integer')
-				{
-					if($this->integer($field) == false)
-					{
-						$error[] = "The {$label} field must be integer.";
-					}
-				}
-
-				if($final_rules == 'alpha_numeric')
-				{
-					if($this->alpha_numeric($field) == false)
-					{
-						$error[] = "The {$label} field must be alpha numeric.";
-					}
-				}
-
-				if($final_rules == 'decimal')
-				{
-					if($this->decimal($field) == false)
-					{
-						$error[] = "The {$label} field must be decimal.";
-					}
-				}
-
-				if($final_rules == 'numeric')
-				{
-					if($this->numeric($field) == false)
-					{
-						$error[] = "The {$label} field must be numeric.";
-					}
-				}
-
-				if($rules_exploed2[0] == 'min_length')
-				{
-					$minlimit = str_ireplace(']', "", $rules_exploed2[1]);
-					if($this->min_length($field, $minlimit) == false)
-					{
-						$error[] = "The {$label} minimum length {$minlimit} character.";
-					}
-				}
-
-				if($rules_exploed2[0] == 'max_length')
-				{
-					$maxlimit = str_ireplace(']', "", $rules_exploed2[1]);
-					if($this->max_length($field, $maxlimit) == false)
-					{
-						$error[] = "The {$form_label} maximum length {$maxlimit} character.";
-					}
-				}
-			}
-		}
-
-		if(count($error) > 0)
-		{
-			foreach($error as $v)
-			{
-				echo "<li style='color: red; list-style: none outside none;'>".$v."</li>";
-			}
-			return false;
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-	/*public function run($group = '')
-	{
-		if($this->set_rules())
-	}*/
-
-	private function required($str)
-    {
-        if ( ! is_array($str))
-        {
-            return (trim($str) == '') ? FALSE : TRUE;
+    
+    /**
+     * Validation 
+     *
+     * Semplice classe PHP per la validazione.
+     *
+     * @author Davide Cesarano <davide.cesarano@unipegaso.it>
+     * @copyright (c) 2016, Davide Cesarano
+     * @license https://github.com/davidecesarano/Validation/blob/master/LICENSE MIT License
+     * @link https://github.com/davidecesarano/Validation
+     */
+    class Validation {
+        
+        /**
+         * @var array $patterns
+         */
+        public $patterns = array(
+            'uri'           => '[A-Za-z0-9-\/_?&=]+',
+            'url'           => '[A-Za-z0-9-:.\/_?&=#]+',
+            'alpha'         => '[\p{L}]+',
+            'words'         => '[\p{L}\s]+',
+            'alphanum'      => '[\p{L}0-9]+',
+            'int'           => '[0-9]+',
+            'float'         => '[0-9\.,]+',
+            'tel'           => '[0-9+\s()-]+',
+            'text'          => '[a-zA-Z0-9.\s\d\w]+',
+            'file'          => '[\p{L}\s0-9-_!%&()=\[\]#@,.;+]+\.[A-Za-z0-9]{2,4}',
+            'folder'        => '[\p{L}\s0-9-_!%&()=\[\]#@,.;+]+',
+            'address'       => '[\p{L}0-9\s.,()°-]+',
+            'date_dmy'      => '[0-9]{1,2}\-[0-9]{1,2}\-[0-9]{4}',
+            'date_ymd'      => '[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}',
+            'email'         => '[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+[.]+[a-z-A-Z]+'
+        );
+        
+        /**
+         * @var array $errors
+         */
+        public $errors = array();
+        
+        /**
+         * Nome del campo
+         * 
+         * @param string $name
+         * @return this
+         */
+        public function name($name){
+            
+            $this->name = $name;
+            return $this;
+        
         }
-        else
-        {
-            return ( ! empty($str));
+        
+        /**
+         * Valore del campo
+         * 
+         * @param mixed $value
+         * @return this
+         */
+        public function value($value){
+            
+            $this->value = $value;
+            return $this;
+        
         }
-    }
-
-	private function unique($table, $filed, $value)
-	{
-		$sql = "select  count(*) as total FROM `".$table."` where `".$filed."` = '".$value."'";
-		$result = mysql_query($sql);
-		while($row = mysql_fetch_array($result))
-		{
-			return $row['total'];
-		}
-	}
-
-	private function matches($str, $field)
-    {
-		if(($str != $field))
-		return false;
-		else
-		return true;
-    }
-
-	private function min_length($str, $val)
-    {
-        if (preg_match("/[^0-9]/", $val))
-        {
-            return FALSE;
+        
+        /**
+         * File
+         * 
+         * @param mixed $value
+         * @return this
+         */
+        public function file($value){
+            
+            $this->file = $value;
+            return $this;
+        
         }
-
-        if (function_exists('mb_strlen'))
-        {
-            return (mb_strlen($str) < $val) ? FALSE : TRUE;
-        }
-
-        return (strlen($str) < $val) ? FALSE : TRUE;
-    }
-
-	private function max_length($str, $val)
-    {
-        if (preg_match("/[^0-9]/", $val))
-        {
-            return FALSE;
-        }
-
-        if (function_exists('mb_strlen'))
-        {
-            return (mb_strlen($str) > $val) ? FALSE : TRUE;
-        }
-
-        return (strlen($str) > $val) ? FALSE : TRUE;
-    }
-
-	private function valid_email($str)
-    {
-        return ( ! preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $str)) ? FALSE : TRUE;
-    }
-
-	private function valid_emails($str)
-    {
-        if (strpos($str, ',') === FALSE)
-        {
-            return $this->valid_email(trim($str));
-        }
-
-        foreach (explode(',', $str) as $email)
-        {
-            if (trim($email) != '' && $this->valid_email(trim($email)) === FALSE)
-            {
-                return FALSE;
+        
+        /**
+         * Pattern da applicare al riconoscimento
+         * dell'espressione regolare
+         * 
+         * @param string $name nome del pattern
+         * @return this
+         */
+        public function pattern($name){
+            
+            if($name == 'array'){
+                
+                if(!is_array($this->value)){
+                    $this->errors[] = 'Field format '.$this->name.' invalid.';
+                }
+            
+            }else{
+            
+                $regex = '/^('.$this->patterns[$name].')$/u';
+                if($this->value != '' && !preg_match($regex, $this->value)){
+                    $this->errors[] = 'Field format '.$this->name.' invalid.';
+                }
+                
             }
+            return $this;
+            
         }
-        return TRUE;
+        
+        /**
+         * Pattern personalizzata
+         * 
+         * @param string $pattern
+         * @return this
+         */
+        public function customPattern($pattern){
+            
+            $regex = '/^('.$pattern.')$/u';
+            if($this->value != '' && !preg_match($regex, $this->value)){
+                $this->errors[] = 'Field format '.$this->name.' invalid.';
+            }
+            return $this;
+            
+        }
+        
+        /**
+         * Campo obbligatorio
+         * 
+         * @return this
+         */
+        public function required(){
+            
+            if((isset($this->file) && $this->file['error'] == 4) || ($this->value == '' || $this->value == null)){
+                $this->errors[] = 'Field '.$this->name.' is required';
+            }            
+            return $this;
+            
+        }
+        
+        /**
+         * Lunghezza minima
+         * del valore del campo
+         * 
+         * @param int $min
+         * @return this
+         */
+        public function min($length){
+            
+            if(is_string($this->value)){
+                
+                if(strlen($this->value) < $length){
+                    $this->errors[] = 'Field value '.$this->name.' less than the minimum value';
+                }
+            }else{
+                
+                if($this->value < $length){
+                    $this->errors[] = 'Field value '.$this->name.' less than the minimum value';
+                }
+                
+            }
+            return $this;
+            
+        }
+            
+        /**
+         * Lunghezza massima
+         * del valore del campo
+         * 
+         * @param int $max
+         * @return this
+         */
+        public function max($length){
+            
+            if(is_string($this->value)){
+                
+                if(strlen($this->value) > $length){
+                    $this->errors[] = 'Field value '.$this->name.' higher than the maximum value';
+                }
+            }else{
+                
+                if($this->value > $length){
+                    $this->errors[] = 'Field value '.$this->name.' higher than the maximum value';
+                }
+                
+            }
+            return $this;
+            
+        }
+        
+        /**
+         * Confronta con il valore di
+         * un altro campo
+         * 
+         * @param mixed $value
+         * @return this
+         */
+        public function equal($value){
+        
+            if($this->value != $value){
+                $this->errors[] = 'Field value '.$this->name.' not matching.';
+            }
+            return $this;
+            
+        }
+        
+        /**
+         * Dimensione massima del file 
+         *
+         * @param int $size
+         * @return this 
+         */
+        public function maxSize($size){
+            
+            if($this->file['error'] != 4 && $this->file['size'] > $size){
+                $this->errors[] = 'The file '.$this->name.' exceeds the maximum size of '.number_format($size / 1048576, 2).' MB.';
+            }
+            return $this;
+            
+        }
+        
+        /**
+         * Estensione (formato) del file
+         *
+         * @param string $extension
+         * @return this 
+         */
+        public function ext($extension){
+
+            if($this->file['error'] != 4 && pathinfo($this->file['name'], PATHINFO_EXTENSION) != $extension && strtoupper(pathinfo($this->file['name'], PATHINFO_EXTENSION)) != $extension){
+                $this->errors[] = 'The file '.$this->name.' it\'s not a '.$extension.'.';
+            }
+            return $this;
+            
+        }
+        
+        /**
+         * Purifica per prevenire attacchi XSS
+         *
+         * @param string $string
+         * @return $string
+         */
+        public function purify($string){
+            return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+        }
+        
+        /**
+         * Campi validati
+         * 
+         * @return boolean
+         */
+        public function isSuccess(){
+            if(empty($this->errors)) return true;
+        }
+        
+        /**
+         * Errori della validazione
+         * 
+         * @return array $this->errors
+         */
+        public function getErrors(){
+            if(!$this->isSuccess()) return $this->errors;
+        }
+        
+        /**
+         * Visualizza errori in formato Html
+         * 
+         * @return string $html
+         */
+        public function displayErrors(){
+            
+            $html = '<ul>';
+                foreach($this->getErrors() as $error){
+                    $html .= '<li>'.$error.'</li>';
+                }
+            $html .= '</ul>';
+            
+            return $html;
+            
+        }
+        
+        /**
+         * Visualizza risultato della validazione
+         *
+         * @return booelan|string
+         */
+        public function result(){
+            
+            if(!$this->isSuccess()){
+                foreach($this->getErrors() as $error){
+                    echo "$error\n";
+                }
+                exit;
+                
+            }else{
+                return true;
+            }
+        
+        }
+        
+        /**
+         * Verifica se il valore è
+         * un numero intero
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_int($value){
+            if(filter_var($value, FILTER_VALIDATE_INT)) return true;
+        }
+        
+        /**
+         * Verifica se il valore è
+         * un numero float
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_float($value){
+            if(filter_var($value, FILTER_VALIDATE_FLOAT)) return true;
+        }
+        
+        /**
+         * Verifica se il valore è
+         * una lettera dell'alfabeto
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_alpha($value){
+            if(filter_var($value, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => "/^[a-zA-Z]+$/")))) return true;
+        }
+        
+        /**
+         * Verifica se il valore è
+         * una lettera o un numero
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_alphanum($value){
+            if(filter_var($value, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => "/^[a-zA-Z0-9]+$/")))) return true;
+        }
+        
+        /**
+         * Verifica se il valore è
+         * un url
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_url($value){
+            if(filter_var($value, FILTER_VALIDATE_URL)) return true;
+        }
+        
+        /**
+         * Verifica se il valore è
+         * un uri
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_uri($value){
+            if(filter_var($value, FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => "/^[A-Za-z0-9-\/_]+$/")))) return true;
+        }
+        
+        /**
+         * Verifica se il valore è
+         * true o false
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_bool($value){
+            if(is_bool(filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE))) return true;
+        }
+        
+        /**
+         * Verifica se il valore è
+         * un'e-mail
+         *
+         * @param mixed $value
+         * @return boolean
+         */
+        public static function is_email($value){
+            if(filter_var($value, FILTER_VALIDATE_EMAIL)) return true;
+        }
+        
     }
-
-	private function alpha_numeric($str)
-    {
-        return ( ! preg_match("/^([a-z0-9])+$/i", $str)) ? FALSE : TRUE;
-    }
-
-	private function numeric($str)
-    {
-        return (bool)preg_match( '/^[\-+]?[0-9]*\.?[0-9]+$/', $str);
-
-    }
-
-	private function integer($str)
-    {
-        return (bool) preg_match('/^[\-+]?[0-9]+$/', $str);
-    }
-
-	private function decimal($str)
-    {
-        return (bool) preg_match('/^[\-+]?[0-9]+\.[0-9]+$/', $str);
-    }
-}
-
-//=============how to use?
-/*$config = array(
-               array(
-                     'field'   => $_GET['Name'],
-                     'label'   => 'Name',
-                     'rules'   => 'need'
-                  ),
-			   array(
-                     'field'   	=> $_GET['Email'],
-                     'label'   	=> 'E-Mail',
-                     'rules'   	=> 'need',
-					 'email'	=>	'valid'
-                     'unique'   =>  'user.email.'.$_GET['Email']
-                  ),
-			   array(
-                     'field'   			=> $_GET['Phone'],
-                     'label'   			=> 'Phone number',
-					 'integer'			=>	TRUE,
-					 'min_length'		=>	'11'
-                  ),
-               array(
-                     'field'   			=> 	$_GET['UserName'],
-                     'label'   			=> 	'User Name',
-                     'rules'   			=> 	'need',
-					 'min_length'		=>	'6',
-					 'max_length'		=>	'16',
-					 'alpha_numeric'	=> 	TRUE
-                  ),
-               array(
-                     'field'   		=> $_GET['PassWord'],
-                     'label'   		=> 'Password',
-                     'rules'   		=> 'need',
-					 'min_length'	=>	'6',
-					 'max_length'	=>	'10'
-                  ),
-               array(
-                     'field'   	=> $_GET['conPassWord'],
-                     'label'   	=> 'Confirmation Password',
-                     'rules'   	=> 'need',
-					 'matches'	=>	$_GET['PassWord']
-                  ),
-			  array(
-                     'field'   => $_GET['condition'],
-                     'label'   => 'Trams & Condition',
-                     'rules'   => 'need'
-                  )
-            );
-
-if($_REQUEST['IsSubmit'])
-{
-	$condition = $validate->set_rules($config);
-	
-}*/
-?>
